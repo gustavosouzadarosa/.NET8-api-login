@@ -14,6 +14,6 @@ namespace ApiLogin.Model
         [Required]
         public required string Password { get; set; } 
 
-        public string? CampoAdicional { get; set; } // Campo personalizado
+        public string? CampoAdicional { get; set; } 
     }
 }

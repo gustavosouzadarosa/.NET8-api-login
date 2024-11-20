@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
+#pragma warning disable S125 // Sections of code should not be commented out
+
 namespace ApiLogin.Data
 {
     // IdentityDbContext == Projetado especificamente para gerenciar informações relacionadas à identidade do usuário,
@@ -23,3 +25,5 @@ namespace ApiLogin.Data
     //    public DbSet<User> Users { get; set; }
     //}
 }
+
+#pragma warning restore S2344

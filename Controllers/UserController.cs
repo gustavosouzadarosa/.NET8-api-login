@@ -11,12 +11,10 @@ namespace ApiLogin.Controllers
     [Route("Login")]
     public class UsersController : ControllerBase
     {
-        private readonly AppDbContext _context;
         private readonly UserManager<User> _userManager;
 
-        public UsersController(AppDbContext context, UserManager<User> userManager)
-        {
-            _context = context;
+        public UsersController(UserManager<User> userManager)
+        {            
             _userManager = userManager;
         }
 
@@ -43,8 +41,8 @@ namespace ApiLogin.Controllers
                 {
                     ModelState.AddModelError(string.Empty, error.Description);
                 }
-                return BadRequest(ModelState);
 
+                return BadRequest(ModelState);
             }
 
             return Ok("User created successfully!");
@@ -105,8 +103,8 @@ namespace ApiLogin.Controllers
                     ModelState.AddModelError(string.Empty, error.Description);
 
                 }
-                return BadRequest(ModelState);
 
+                return BadRequest(ModelState);
             }
 
             return Ok("User updated successfully!");

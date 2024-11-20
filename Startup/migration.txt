@@ -1,0 +1,5 @@
+dotnet tool install --global dotnet-ef
+
+dotnet ef migrations add InitialCreate 
+dotnet ef migration add "name"
+dotnet ef database update

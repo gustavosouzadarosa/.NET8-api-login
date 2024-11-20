@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 
-namespace ApiLogin.Model
+namespace ApiLogin.Entities
 {
     public class User : IdentityUser
     {

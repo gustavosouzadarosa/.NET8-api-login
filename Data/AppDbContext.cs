@@ -1,4 +1,4 @@
-﻿using ApiLogin.Model;
+﻿using ApiLogin.Entities;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 

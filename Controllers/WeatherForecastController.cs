@@ -1,4 +1,4 @@
-using ApiLogin.Model;
+using ApiLogin.Entities;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ApiLogin.Controllers

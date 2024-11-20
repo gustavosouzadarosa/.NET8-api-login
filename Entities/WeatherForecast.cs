@@ -1,4 +1,4 @@
-namespace ApiLogin.Model
+namespace ApiLogin.Entities
 {
     public class WeatherForecast
     {

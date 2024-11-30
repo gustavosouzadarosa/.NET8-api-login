@@ -4,6 +4,7 @@ using ApiLogin.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authorization;
 
 namespace ApiLogin.Controllers
 {
@@ -14,7 +15,7 @@ namespace ApiLogin.Controllers
         private readonly UserManager<User> _userManager;
 
         public UsersController(UserManager<User> userManager)
-        {            
+        {
             _userManager = userManager;
         }
 
@@ -35,7 +36,14 @@ namespace ApiLogin.Controllers
 
             var result = await _userManager.CreateAsync(user, model.Password);
 
-            if (!result.Succeeded)
+            if (result.Succeeded)
+            {
+                if (model.IsAdmin)
+                {
+                    await _userManager.AddToRoleAsync(user, "Administrator");
+                }
+            }
+            else
             {
                 foreach (var error in result.Errors)
                 {
@@ -49,6 +57,7 @@ namespace ApiLogin.Controllers
         }
 
         [HttpGet("GetUser/{id}")]
+        [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> GetUser(string id)
         {
             if (string.IsNullOrEmpty(id))
@@ -73,6 +82,7 @@ namespace ApiLogin.Controllers
         }
 
         [HttpPut("EditUser")]
+        [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> EditUser([FromBody] EditUserViewModel model)
         {
             if (string.IsNullOrEmpty(model.UserId))

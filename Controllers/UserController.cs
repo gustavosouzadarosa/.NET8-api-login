@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authorization;
+using ApiLogin.Interfaces;
 
 namespace ApiLogin.Controllers
 {
@@ -13,10 +14,26 @@ namespace ApiLogin.Controllers
     public class UsersController : ControllerBase
     {
         private readonly UserManager<User> _userManager;
+        private readonly IAuthenticationService _authenticationService;
 
-        public UsersController(UserManager<User> userManager)
+        public UsersController(UserManager<User> userManager,
+                               IAuthenticationService authenticationService)
         {
             _userManager = userManager;
+            _authenticationService = authenticationService;
+        }
+
+        [HttpPost("GenerateToken")]
+        public async Task<IActionResult> GenerateToken([FromBody] LoginViewModel model)
+        {
+            var token = await _authenticationService.GenerateToken(model.UserName, model.Password);
+
+            if (token == null)
+            {
+                return Unauthorized();
+            }
+
+            return Ok(new { token });
         }
 
         [HttpPost("CreateUser")]

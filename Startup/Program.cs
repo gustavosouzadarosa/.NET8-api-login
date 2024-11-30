@@ -5,6 +5,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using ApiLogin.Interfaces;
 using ApiLogin.Implementations;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using ApiLogin.Model;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,17 +23,59 @@ builder.Services.AddIdentity<User, IdentityRole>()
                 .AddEntityFrameworkStores<AppDbContext>()
                 .AddDefaultTokenProviders(); // UserManager do Identity
 
+// Bearer Authorization
+builder.Services.Configure<TokenSettings>(builder.Configuration.GetSection("TokenSettings"));
+var tokenSettings = builder.Configuration.GetSection("TokenSettings").Get<TokenSettings>();
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(options =>
+                {
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuerSigningKey = true,
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(tokenSettings.Secret)),
+                        ValidateIssuer = true,
+                        ValidIssuer = tokenSettings.Issuer,
+                        ValidateAudience = true,
+                        ValidAudience = tokenSettings.Audience
+                    };
+                });
+
 // Controllers and Endpoints
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
 // Dependency Injection
 builder.Services.AddScoped<IDataSeeder, DataSeeder>();
+builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 
 // Swagger
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "Login Api", Version = "v1" });
+
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Description = "JWT Authorization header using the Bearer scheme.",
+        Name = "Authorization",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.ApiKey
+
+    });
+
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            new string[] {}
+        }
+    });
 });
 
 // Build the application
@@ -50,10 +96,10 @@ app.UseAuthorization();
 app.MapControllers();
 
 // Seed Roles
-using (var scope = app.Services.CreateScope()) 
+using (var scope = app.Services.CreateScope())
 {
-    var services = scope.ServiceProvider; 
-    var seeder = services.GetRequiredService<IDataSeeder>(); 
+    var services = scope.ServiceProvider;
+    var seeder = services.GetRequiredService<IDataSeeder>();
     await seeder.SeedRolesAsync(services);
 }
 

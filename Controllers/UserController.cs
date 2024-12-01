@@ -45,6 +45,10 @@ namespace ApiLogin.Controllers
         [HttpPost("CreateUser")]
         public async Task<IActionResult> CreateUser([FromBody] CreateUserViewModel model)
         {
+            // This method does not require authentication and authorization for development and testing environments only.
+            // In a production environment, we should implement validation methods here.
+            // var validationResult = _basicValidations.IsAdministratorUser();
+
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);

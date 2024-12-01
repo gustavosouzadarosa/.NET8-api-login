@@ -1,4 +1,5 @@
-﻿using ApiLogin.Interfaces;
+﻿using ApiLogin.Custom;
+using ApiLogin.Interfaces;
 using Microsoft.AspNetCore.Identity;
 
 namespace ApiLogin.Implementations
@@ -7,18 +8,25 @@ namespace ApiLogin.Implementations
     {
         public async Task SeedRolesAsync(IServiceProvider serviceProvider)
         {
-            var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-
-            var rolesToCreate = new[] { "Administrator" };
-
-            foreach (var roleName in rolesToCreate)
+            try
             {
-                var roleExists = await roleManager.RoleExistsAsync(roleName);
+                var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
 
-                if (!roleExists)
+                var rolesToCreate = new[] { "Administrator" };
+
+                foreach (var roleName in rolesToCreate)
                 {
-                    await roleManager.CreateAsync(new IdentityRole(roleName));
+                    var roleExists = await roleManager.RoleExistsAsync(roleName);
+
+                    if (!roleExists)
+                    {
+                        await roleManager.CreateAsync(new IdentityRole(roleName));
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                throw new GenericApplicationException("Error initializing data seed. (ERROR 0001)", ex);
             }
         }
 

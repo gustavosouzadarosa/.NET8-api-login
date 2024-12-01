@@ -2,5 +2,6 @@
 {
     public interface IJwtMiddleware
     {
+        Task Invoke(HttpContext context);
     }
 }

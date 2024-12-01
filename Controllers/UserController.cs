@@ -6,6 +6,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authorization;
 using ApiLogin.Interfaces;
+using System.Security.Claims;
+using ApiLogin.Implementations;
 
 namespace ApiLogin.Controllers
 {
@@ -15,15 +17,19 @@ namespace ApiLogin.Controllers
     {
         private readonly UserManager<User> _userManager;
         private readonly IAuthenticationService _authenticationService;
+        private readonly IBasicValidations _basicValidations;
 
         public UsersController(UserManager<User> userManager,
-                               IAuthenticationService authenticationService)
+                               IAuthenticationService authenticationService,
+                               IBasicValidations basicValidations)
         {
             _userManager = userManager;
             _authenticationService = authenticationService;
+            _basicValidations = basicValidations;
         }
 
         [HttpPost("GenerateToken")]
+        [AllowAnonymous]
         public async Task<IActionResult> GenerateToken([FromBody] LoginViewModel model)
         {
             var token = await _authenticationService.GenerateToken(model.UserName, model.Password);
@@ -74,9 +80,15 @@ namespace ApiLogin.Controllers
         }
 
         [HttpGet("GetUser/{id}")]
-        [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> GetUser(string id)
         {
+            var validationResult = _basicValidations.IsAuthenticatedUser();
+
+            if (!validationResult)
+            {
+                return BadRequest("User does not have permission to access this resource.");
+            }
+
             if (string.IsNullOrEmpty(id))
             {
                 return BadRequest("User ID is required.");
@@ -99,9 +111,15 @@ namespace ApiLogin.Controllers
         }
 
         [HttpPut("EditUser")]
-        [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> EditUser([FromBody] EditUserViewModel model)
         {
+            var validationResult = _basicValidations.IsAdministratorUser();
+
+            if (!validationResult.Authenticated || !validationResult.Administrator)
+            {
+                return BadRequest("User does not have permission to access this resource.");
+            }
+
             if (string.IsNullOrEmpty(model.UserId))
             {
                 return BadRequest("User ID is required.");

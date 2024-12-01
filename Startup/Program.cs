@@ -25,20 +25,6 @@ builder.Services.AddIdentity<User, IdentityRole>()
 
 // Bearer Authorization
 builder.Services.Configure<TokenSettings>(builder.Configuration.GetSection("TokenSettings"));
-var tokenSettings = builder.Configuration.GetSection("TokenSettings").Get<TokenSettings>();
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                .AddJwtBearer(options =>
-                {
-                    options.TokenValidationParameters = new TokenValidationParameters
-                    {
-                        ValidateIssuerSigningKey = true,
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(tokenSettings.Secret)),
-                        ValidateIssuer = true,
-                        ValidIssuer = tokenSettings.Issuer,
-                        ValidateAudience = true,
-                        ValidAudience = tokenSettings.Audience
-                    };
-                });
 
 // Controllers and Endpoints
 builder.Services.AddControllers();
@@ -47,6 +33,8 @@ builder.Services.AddEndpointsApiExplorer();
 // Dependency Injection
 builder.Services.AddScoped<IDataSeeder, DataSeeder>();
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IBasicValidations, BasicValidations>();
 
 // Swagger
 builder.Services.AddSwaggerGen(c =>
@@ -91,6 +79,7 @@ if (app.Environment.IsDevelopment())
 // Security Middleware
 app.UseHttpsRedirection();
 app.UseAuthorization();
+app.UseMiddleware<JwtMiddleware>();
 
 // Map Controllers
 app.MapControllers();

@@ -36,6 +36,19 @@ builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IBasicValidations, BasicValidations>();
 
+// SMTP
+builder.Services.AddTransient<IEmailService>(provider =>
+{
+    var smtpSettings = builder.Configuration.GetSection("SmtpSettings");
+    return new EmailService(
+        smtpSettings.GetValue<string>("Server") ?? throw new InvalidOperationException("SmtpSettings:Server is missing"),
+        smtpSettings.GetValue<int>("Port"),
+        smtpSettings.GetValue<string>("Username") ?? throw new InvalidOperationException("SmtpSettings:Username is missing"),
+        smtpSettings.GetValue<string>("Password") ?? throw new InvalidOperationException("SmtpSettings:Password is missing"),
+        smtpSettings.GetValue<bool>("UseSsl")
+    );
+});
+
 // Swagger
 builder.Services.AddSwaggerGen(c =>
 {

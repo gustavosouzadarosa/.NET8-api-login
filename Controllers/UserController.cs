@@ -18,14 +18,17 @@ namespace ApiLogin.Controllers
         private readonly UserManager<User> _userManager;
         private readonly IAuthenticationService _authenticationService;
         private readonly IBasicValidations _basicValidations;
+        private readonly IEmailService _emailService;
 
         public UsersController(UserManager<User> userManager,
                                IAuthenticationService authenticationService,
-                               IBasicValidations basicValidations)
+                               IBasicValidations basicValidations,
+                               IEmailService emailService)
         {
             _userManager = userManager;
             _authenticationService = authenticationService;
             _basicValidations = basicValidations;
+            _emailService = emailService;
         }
 
         [HttpPost("GenerateToken")]
@@ -84,7 +87,7 @@ namespace ApiLogin.Controllers
         }
 
 
-        [HttpGet("GetUser")] 
+        [HttpGet("GetUser")]
         public async Task<IActionResult> GetUser(string? id = null, string? userName = null)
         {
             var validationResult = _basicValidations.IsAuthenticatedUser();
@@ -99,7 +102,7 @@ namespace ApiLogin.Controllers
                 return BadRequest("Search parameters are required.");
             }
 
-            User? user = null; 
+            User? user = null;
 
             if (!string.IsNullOrEmpty(id))
             {
@@ -107,7 +110,7 @@ namespace ApiLogin.Controllers
             }
             else if (!string.IsNullOrEmpty(userName))
             {
-                user = await _userManager.FindByNameAsync(userName);               
+                user = await _userManager.FindByNameAsync(userName);
             }
 
             if (user == null)
@@ -167,6 +170,27 @@ namespace ApiLogin.Controllers
             }
 
             return Ok("User updated successfully!");
+        }
+
+        [HttpPost("SendTestEmail")]
+        public async Task<IActionResult> SendTestEmail(string toEmail, string subject, string message)
+        {
+            // This method was created just to simulate and test sending emails, and can still be completely reformulated.
+            // It will be necessary for the development of 2FA.
+            // If you don't have an SMTP server, I recommend using the website https://mailtrap.io/ to test sending emails
+
+            // TODO: continue development of 2fa
+
+            var validationResult = _basicValidations.IsAuthenticatedUser();
+
+            if (!validationResult)
+            {
+                return BadRequest("User does not have permission to access this resource.");
+            }
+
+            await _emailService.SendEmailAsync(toEmail, subject, message);
+
+            return Ok("Email sent successfully!");
         }
     }
 }

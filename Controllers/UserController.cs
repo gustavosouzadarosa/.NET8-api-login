@@ -83,8 +83,9 @@ namespace ApiLogin.Controllers
             return Ok("User created successfully!");
         }
 
-        [HttpGet("GetUser/{id}")]
-        public async Task<IActionResult> GetUser(string id)
+
+        [HttpGet("GetUser")] 
+        public async Task<IActionResult> GetUser(string? id = null, string? userName = null)
         {
             var validationResult = _basicValidations.IsAuthenticatedUser();
 
@@ -93,12 +94,21 @@ namespace ApiLogin.Controllers
                 return BadRequest("User does not have permission to access this resource.");
             }
 
-            if (string.IsNullOrEmpty(id))
+            if (string.IsNullOrEmpty(id) && string.IsNullOrEmpty(userName))
             {
-                return BadRequest("User ID is required.");
+                return BadRequest("Search parameters are required.");
             }
 
-            var user = await _userManager.FindByIdAsync(id);
+            User? user = null; 
+
+            if (!string.IsNullOrEmpty(id))
+            {
+                user = await _userManager.FindByIdAsync(id);
+            }
+            else if (!string.IsNullOrEmpty(userName))
+            {
+                user = await _userManager.FindByNameAsync(userName);               
+            }
 
             if (user == null)
             {

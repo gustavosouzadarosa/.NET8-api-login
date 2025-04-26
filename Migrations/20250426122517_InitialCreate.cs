@@ -3,12 +3,10 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-#pragma warning disable S101 // Types should be named in PascalCase
-
 namespace ApiLogin.Migrations
-{  
+{
     /// <inheritdoc />
-    public partial class _20241120_1 : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -225,5 +223,3 @@ namespace ApiLogin.Migrations
         }
     }
 }
-
-#pragma warning restore S101
